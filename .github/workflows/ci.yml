@@ -1,0 +1,33 @@
+name: Compile Document
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  compile_document:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+
+      - name: Compile Document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: Resume.tex
+
+      - name: Set Environment Variables
+        id: set_environment_variables
+        run: echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Rename Document
+        run: |
+          mv Resume.pdf Resume-${{ env.commit_sha }}.pdf
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Resume
+          path: Resume-${{ env.commit_sha }}.pdf
+          retention-days: 90
